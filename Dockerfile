@@ -1,34 +1,31 @@
-# ── Stage 1 : Build React ─────────────────────────────────────────────────────
-FROM node:20-alpine AS frontend-builder
-
-WORKDIR /frontend-build
-
-COPY frontend/package*.json ./
-RUN npm install --silent
-
-COPY frontend/ ./
-RUN npm run build
-
-# ── Stage 2 : Python + Nginx ──────────────────────────────────────────────────
+# ── Image unique Python + Nginx ───────────────────────────────────────────────
+# Le frontend React est déjà buildé par GitHub Actions et poussé dans frontend/dist/
+# Ce Dockerfile ne fait QUE copier le dist/ déjà prêt — pas de Node ici.
 FROM python:3.11-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    nginx curl build-essential git-lfs && \
+    nginx curl build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+# Dépendances Python
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Code backend
 COPY backend/ .
 
-COPY --from=frontend-builder /frontend-build/dist /app/static
+# Frontend déjà buildé (copié par GitHub Actions dans frontend/dist/)
+COPY frontend/dist/ /app/static/
 
+# Config Nginx
 COPY nginx.conf /etc/nginx/sites-enabled/default
 
+# Répertoires de données
 RUN mkdir -p /app/data /app/models /app/logs /app/cache
 
+# Script de démarrage
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
