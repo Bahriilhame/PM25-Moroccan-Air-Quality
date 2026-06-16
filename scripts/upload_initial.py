@@ -32,6 +32,7 @@ import sys
 import tarfile
 from pathlib import Path
 
+import tempfile
 
 def main():
     parser = argparse.ArgumentParser(description="Upload initial vers HF Dataset")
@@ -95,7 +96,7 @@ def main():
         print(f"      ⚠️  Fichiers manquants dans {models_dir} : {missing}")
         print(f"      → Continue quand même...")
 
-    tar_path = Path("/tmp/models.tar.gz")
+    tar_path = Path(tempfile.gettempdir()) / "models.tar.gz"
     with tarfile.open(tar_path, "w:gz") as tar:
         # Archive sous le nom "models/" pour cohérence avec hf_storage.py
         tar.add(models_dir, arcname="models")
