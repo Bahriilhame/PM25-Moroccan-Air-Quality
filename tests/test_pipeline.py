@@ -146,32 +146,66 @@ def test_inference_row_no_nan_temporel(small_history):
 
 # ── Tests collecteur ──────────────────────────────────────────────────────────
 
+# def test_append_to_history(tmp_path, small_history):
+#     """append_to_history doit dédoublonner correctement."""
+#     import os
+#     os.environ["DATA_DIR"] = str(tmp_path)
+
+#     # Réimporter avec le nouveau chemin
+#     from core.config import Settings
+#     s = Settings(DATA_DIR=tmp_path)
+#     s.setup_dirs()
+
+#     hist_path = tmp_path / "history.csv"
+
+#     # Premier write
+#     small_history.to_csv(hist_path, index=False)
+#     n1 = len(small_history)
+
+#     # Deuxième write avec overlap
+#     from ml.collector import append_to_history
+#     # Simuler avec DATA_DIR patchée
+#     import ml.collector as col_mod
+#     orig = col_mod.settings.DATA_DIR
+#     col_mod.settings.DATA_DIR = tmp_path
+
+#     append_to_history(small_history)   # même données → pas de doublon
+
+#     df2 = pd.read_csv(hist_path, parse_dates=["datetime"])
+#     assert len(df2) == n1, f"Doublon détecté: attendu {n1}, trouvé {len(df2)}"
+
+#     col_mod.settings.DATA_DIR = orig
+
+
+
 def test_append_to_history(tmp_path, small_history):
     """append_to_history doit dédoublonner correctement."""
-    import os
-    os.environ["DATA_DIR"] = str(tmp_path)
-
-    # Réimporter avec le nouveau chemin
-    from core.config import Settings
-    s = Settings(DATA_DIR=tmp_path)
-    s.setup_dirs()
-
-    hist_path = tmp_path / "history.csv"
-
-    # Premier write
-    small_history.to_csv(hist_path, index=False)
-    n1 = len(small_history)
-
-    # Deuxième write avec overlap
-    from ml.collector import append_to_history
-    # Simuler avec DATA_DIR patchée
     import ml.collector as col_mod
-    orig = col_mod.settings.DATA_DIR
+
+    # 1. Sauvegarde du chemin d'origine pour ne pas polluer les autres tests
+    orig_data = col_mod.settings.DATA_DIR
+
+    # 2. Injection du dossier temporaire de Pytest (sûr en CI)
     col_mod.settings.DATA_DIR = tmp_path
 
-    append_to_history(small_history)   # même données → pas de doublon
+    # Définition du chemin du fichier CSV dans ce dossier temporaire
+    hist_path = tmp_path / "history.csv"
 
-    df2 = pd.read_csv(hist_path, parse_dates=["datetime"])
-    assert len(df2) == n1, f"Doublon détecté: attendu {n1}, trouvé {len(df2)}"
+    try:
+        # Premier write : On crée le fichier initial avec tes données de test
+        small_history.to_csv(hist_path, index=False)
+        n1 = len(small_history)
 
-    col_mod.settings.DATA_DIR = orig
+        # Deuxième write avec overlap (appelle la fonction à tester)
+        # Elle va lire et réécrire dans col_mod.settings.DATA_DIR / "history.csv"
+        col_mod.append_to_history(small_history)
+
+        # Vérification : Les mêmes données ne doivent pas créer de doublons
+        df2 = pd.read_csv(hist_path, parse_dates=["datetime"])
+        assert (
+            len(df2) == n1
+        ), f"Doublon détecté: attendu {n1}, trouvé {len(df2)}"
+
+    finally:
+        # 3. Restauration GARANTIE du chemin d'origine, même si le assert échoue
+        col_mod.settings.DATA_DIR = orig_data
