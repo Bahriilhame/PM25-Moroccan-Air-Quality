@@ -104,11 +104,17 @@ app.add_middleware(
 )
 
 # Routes API
-app.include_router(health_router, prefix="/api/health",      tags=["Health"])
-app.include_router(pred_router,   prefix="/api/predictions", tags=["Predictions"])
-app.include_router(cities_router, prefix="/api/cities",      tags=["Cities"])
-app.include_router(admin_router,  prefix="/api/admin",       tags=["Admin"])
+# app.include_router(health_router, prefix="/api/health",      tags=["Health"])
+# app.include_router(pred_router,   prefix="/api/predictions", tags=["Predictions"])
+# app.include_router(cities_router, prefix="/api/cities",      tags=["Cities"])
+# app.include_router(admin_router,  prefix="/api/admin",       tags=["Admin"])
 
+
+# Routes API
+app.include_router(health_router, prefix="/health",      tags=["Health"])
+app.include_router(pred_router,   prefix="/predictions", tags=["Predictions"])
+app.include_router(cities_router, prefix="/cities",      tags=["Cities"])
+app.include_router(admin_router,  prefix="/admin",       tags=["Admin"])
 
 if __name__ == "__main__":
     uvicorn.run(
