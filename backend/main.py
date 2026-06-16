@@ -24,6 +24,8 @@ from api.routes.predictions import router as pred_router
 from api.routes.other_routes import (
     health_router, cities_router, admin_router
 )
+from api.routes.weather import weather_router
+
 from core.config import settings
 from core.logger import get_logger
 from ml.loader import load_artefacts, init_artefacts, get_artefacts
@@ -115,6 +117,7 @@ app.include_router(health_router, prefix="/health",      tags=["Health"])
 app.include_router(pred_router,   prefix="/predictions", tags=["Predictions"])
 app.include_router(cities_router, prefix="/cities",      tags=["Cities"])
 app.include_router(admin_router,  prefix="/admin",       tags=["Admin"])
+app.include_router(weather_router, prefix="/weather", tags=["Weather"])
 
 if __name__ == "__main__":
     uvicorn.run(
