@@ -25,17 +25,18 @@ from core.config import settings
 
 
 class _Utf8JsonFormatter(jsonlogger.JsonFormatter):
-    """JsonFormatter avec ensure_ascii=False pour afficher
-    les emojis et accents directement (pas \ud83d\ude80 etc.)."""
+    # """JsonFormatter avec ensure_ascii=False pour afficher
+    # les emojis et accents directement (pas \ud83d\ude80 etc.)."""
+    """UTF8 JSON formatter"""
 
     def jsonify_log_record(self, log_record):
         import json
-        # return json.dumps(log_record, ensure_ascii=False)
-        return json.dumps(
-            log_record,
-            ensure_ascii=False,
-            default=str
-        )
+        return json.dumps(log_record, ensure_ascii=False)
+        # return json.dumps(
+        #     log_record,
+        #     ensure_ascii=False,
+        #     default=str
+        # )
 
 
 def get_logger(name: str) -> logging.Logger:
