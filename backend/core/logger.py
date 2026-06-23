@@ -30,7 +30,12 @@ class _Utf8JsonFormatter(jsonlogger.JsonFormatter):
 
     def jsonify_log_record(self, log_record):
         import json
-        return json.dumps(log_record, ensure_ascii=False)
+        # return json.dumps(log_record, ensure_ascii=False)
+        return json.dumps(
+            log_record,
+            ensure_ascii=False,
+            default=str
+        )
 
 
 def get_logger(name: str) -> logging.Logger:
