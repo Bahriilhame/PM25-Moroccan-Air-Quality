@@ -32,11 +32,6 @@ class _Utf8JsonFormatter(jsonlogger.JsonFormatter):
     def jsonify_log_record(self, log_record):
         import json
         return json.dumps(log_record, ensure_ascii=False)
-        # return json.dumps(
-        #     log_record,
-        #     ensure_ascii=False,
-        #     default=str
-        # )
 
 
 def get_logger(name: str) -> logging.Logger:
@@ -44,8 +39,10 @@ def get_logger(name: str) -> logging.Logger:
     if logger.handlers:
         return logger
     handler = logging.StreamHandler(sys.stdout)
-    formatter = _Utf8JsonFormatter("%(asctime)s %(name)s %(levelname)s %(message)s")
-    handler.setFormatter(formatter)
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s  %(levelname)-8s  %(name)s — %(message)s",
+        datefmt="%H:%M:%S",
+    ))
     logger.addHandler(handler)
     logger.setLevel(getattr(logging, settings.LOG_LEVEL, logging.INFO))
     return logger
